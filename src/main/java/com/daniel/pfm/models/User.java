@@ -148,4 +148,7 @@ public class User implements UserDetails {
         this.password = hashedPassword;
         this.name = entity.getName();
     }
+
+    public User() {
+    }
 }

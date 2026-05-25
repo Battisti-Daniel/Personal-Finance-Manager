@@ -1,11 +1,13 @@
 package com.daniel.pfm.controllers;
 
 import com.daniel.pfm.dtos.Auth.AuthResponseDTO;
+import com.daniel.pfm.dtos.Login.LoginRequestDTO;
 import com.daniel.pfm.dtos.User.UserRequestDTO;
 import com.daniel.pfm.dtos.User.UserResponseDTO;
 import com.daniel.pfm.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +35,15 @@ public class UserController {
                 .toUri();
 
         return ResponseEntity.created(uri).body(response);
+
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponseDTO> loginUser(@Valid @RequestBody LoginRequestDTO loginRequestDTO){
+
+        AuthResponseDTO response = userService.login(loginRequestDTO);
+
+        return ResponseEntity.ok().body(response);
 
     }
 
