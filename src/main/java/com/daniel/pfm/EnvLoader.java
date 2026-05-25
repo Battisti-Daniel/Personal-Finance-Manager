@@ -14,5 +14,8 @@ public class EnvLoader {
         System.setProperty("DB_DATABASE", dotenv.get("DB_DATABASE"));
         System.setProperty("DB_NAME", dotenv.get("DB_NAME"));
 
+        System.setProperty("JWT_SECRET", dotenv.get("JWT_SECRET"));
+        System.setProperty("JWT_EXPIRATION", dotenv.get("JWT_EXPIRATION"));
+
     }
 }

@@ -1,5 +1,6 @@
 package com.daniel.pfm.controllers;
 
+import com.daniel.pfm.dtos.Auth.AuthResponseDTO;
 import com.daniel.pfm.dtos.User.UserRequestDTO;
 import com.daniel.pfm.dtos.User.UserResponseDTO;
 import com.daniel.pfm.services.UserService;
@@ -22,13 +23,13 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponseDTO> registerUser(@Valid @RequestBody UserRequestDTO entity) {
+    public ResponseEntity<AuthResponseDTO> registerUser(@Valid @RequestBody UserRequestDTO entity) {
 
-        UserResponseDTO response = userService.register(entity);
+        AuthResponseDTO response = userService.register(entity);
 
         URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri()
                 .path("/{id}")
-                .buildAndExpand(response.getId())
+                .buildAndExpand(response.getUser().getId())
                 .toUri();
 
         return ResponseEntity.created(uri).body(response);
