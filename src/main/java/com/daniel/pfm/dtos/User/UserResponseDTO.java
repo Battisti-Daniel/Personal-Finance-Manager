@@ -8,6 +8,7 @@ import java.util.UUID;
 public class UserResponseDTO {
     @Getter
     private UUID id;
+    @Getter
     private String email;
     private String name;
 
