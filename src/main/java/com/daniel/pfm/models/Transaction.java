@@ -1,17 +1,24 @@
 package com.daniel.pfm.models;
 
+import com.daniel.pfm.dtos.Transactions.TransactionRequestDTO;
 import com.daniel.pfm.enums.TransactionType;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Table(name = "transactions")
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
 public class Transaction {
 
     @Id
@@ -22,8 +29,9 @@ public class Transaction {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL)
-    private List<Category> category;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @Column(nullable = false, length = 200)
     private String description;
@@ -36,7 +44,7 @@ public class Transaction {
     private TransactionType type;
 
     @CreationTimestamp
-    private LocalDateTime date;
+    private LocalDate date;
 
     private  String notes;
 
@@ -49,5 +57,13 @@ public class Transaction {
     @UpdateTimestamp
     private LocalDateTime updated_at;
 
-
+    public Transaction(TransactionRequestDTO entity, User user, Category category) {
+        this.notes = entity.getNotes();
+        this.date = entity.getDate();
+        this.amount = entity.getAmount();
+        this.description = entity.getDescription();
+        this.category = category;
+        this.user = user;
+        this.type = category.getType();
+    }
 }

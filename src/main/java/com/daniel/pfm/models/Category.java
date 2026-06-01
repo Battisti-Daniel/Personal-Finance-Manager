@@ -1,14 +1,24 @@
 package com.daniel.pfm.models;
 
+import com.daniel.pfm.dtos.Category.CategoryRequestDTO;
 import com.daniel.pfm.enums.TransactionType;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Table(name = "categories")
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class Category {
 
     @Id
@@ -30,10 +40,6 @@ public class Category {
     private String color;
 
     @ManyToOne
-    @JoinColumn(name = "transaction_id")
-    private Transaction transaction;
-
-    @ManyToOne
     @JoinColumn(name = "budget_id")
     private Budget budget;
 
@@ -44,5 +50,15 @@ public class Category {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
 
+    public Category(User user, CategoryRequestDTO entity) {
+        this.user = user;
+        this.name = entity.getName();
+        this.type = entity.getType();
+        this.color = entity.getColor();
+        this.icon = entity.getIcon();
+    }
 }

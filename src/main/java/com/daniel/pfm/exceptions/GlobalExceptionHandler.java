@@ -66,5 +66,21 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponseDTO(HttpStatus.UNAUTHORIZED.value(), List.of(ex.getMessage())));
     }
 
+    @ExceptionHandler(CategoryAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponseDTO> handleCategoryAlreadyExistsException(CategoryAlreadyExistsException ex){
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new ErrorResponseDTO(HttpStatus.CONFLICT.value(), List.of(ex.getMessage())));
+    }
+
+    @ExceptionHandler(CategoryDoesNotExistsException.class)
+    public ResponseEntity<ErrorResponseDTO> handleCategoryDoesNotExistsException(CategoryDoesNotExistsException ex){
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponseDTO(HttpStatus.NOT_FOUND.value(), List.of(ex.getMessage())));
+
+    }
+
 }
 

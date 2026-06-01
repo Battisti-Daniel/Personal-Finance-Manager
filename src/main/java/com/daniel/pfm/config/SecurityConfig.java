@@ -51,6 +51,11 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/me").authenticated()
+<<<<<<< HEAD
+=======
+                        .requestMatchers("/api/v1/categories/**").authenticated()
+                        .requestMatchers("/api/v1/transactions/**").authenticated()
+>>>>>>> 66c16b4 (add category management with CRUD operations and exceptions handling)
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
