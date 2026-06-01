@@ -78,6 +78,13 @@ public class UserService {
 
     }
 
+    public UserResponseDTO me(String email){
+        User user = repository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario não encontrado"));
+
+        return new UserResponseDTO(user);
+    }
+
     private User createUser(UserRequestDTO userDTO){
 
         String hashedPassword = passwordEncoder.encode(userDTO.getPassword());
