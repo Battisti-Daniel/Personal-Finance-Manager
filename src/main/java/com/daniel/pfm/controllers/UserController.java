@@ -1,6 +1,7 @@
 package com.daniel.pfm.controllers;
 
 import com.daniel.pfm.dtos.Auth.AuthResponseDTO;
+import com.daniel.pfm.dtos.Auth.RefreshRequestDTO;
 import com.daniel.pfm.dtos.Login.LoginRequestDTO;
 import com.daniel.pfm.dtos.User.UserRequestDTO;
 import com.daniel.pfm.dtos.User.UserResponseDTO;
@@ -47,5 +48,13 @@ public class UserController {
 
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponseDTO> refresh(@Valid @RequestBody RefreshRequestDTO entity){
+
+        AuthResponseDTO response = userService.refresh(entity);
+
+        return ResponseEntity.ok(response);
+
+    }
 
 }

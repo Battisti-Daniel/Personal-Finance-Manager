@@ -1,5 +1,6 @@
 package com.daniel.pfm.services;
 
+import com.daniel.pfm.models.RefreshToken;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

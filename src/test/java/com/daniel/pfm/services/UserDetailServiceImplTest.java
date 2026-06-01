@@ -34,6 +34,7 @@ public class UserDetailServiceImplTest {
                 (
                         "daniel@email.com",
                         "hashedPassword",
+                        "daniel",
                         "Daniel"
                 ),
                 "hashedPassword"

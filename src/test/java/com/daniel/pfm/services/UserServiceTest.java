@@ -1,10 +1,12 @@
 package com.daniel.pfm.services;
 
 import com.daniel.pfm.dtos.Auth.AuthResponseDTO;
+import com.daniel.pfm.dtos.Auth.RefreshRequestDTO;
 import com.daniel.pfm.dtos.Login.LoginRequestDTO;
 import com.daniel.pfm.dtos.User.UserRequestDTO;
 import com.daniel.pfm.dtos.User.UserResponseDTO;
 import com.daniel.pfm.exceptions.UserAlreadyExistsException;
+import com.daniel.pfm.models.RefreshToken;
 import com.daniel.pfm.models.User;
 import com.daniel.pfm.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
@@ -41,6 +44,9 @@ public class UserServiceTest {
     @Mock
     private AuthenticationManager authenticationManager;
 
+    @Mock
+    private RefreshTokenService refreshTokenService;
+
     @InjectMocks
     private UserService userService;
 
@@ -50,6 +56,7 @@ public class UserServiceTest {
         UserRequestDTO request = new UserRequestDTO(
                 "daniel@email.com",
                 "123456789",
+                "daniel",
                 "daniel"
         );
 
@@ -57,11 +64,12 @@ public class UserServiceTest {
         when(passwordEncoder.encode(request.getPassword())).thenReturn("hashedPassword");
         when(repository.save(any(User.class))).thenAnswer(invocation -> (User) invocation.getArgument(0));
         when(jwtService.generateToken(any())).thenReturn("token");
+        when(refreshTokenService.createRefreshToken(any(),any())).thenReturn(new RefreshToken());
 
         AuthResponseDTO response = userService.register(request);
 
         assertNotNull(response);
-        assertNotNull(response.getToken());
+        assertNotNull(response.getAccessToken());
         assertEquals("daniel@email.com", response.getUser().getEmail());
 
     }
@@ -72,6 +80,7 @@ public class UserServiceTest {
         UserRequestDTO request = new UserRequestDTO(
                 "daniel@email.com",
                 "123456789",
+                "daniel",
                 "Daniel"
         );
 
@@ -89,13 +98,15 @@ public class UserServiceTest {
         UserRequestDTO request = new UserRequestDTO(
                 "daniel@email.com",
                 "123456789",
-                "Daniel"
+                "Daniel",
+                "daniel"
         );
 
         when(repository.existsByEmail(request.getEmail())).thenReturn(false);
         when(passwordEncoder.encode(request.getPassword())).thenReturn("hashedPassword");
         when(repository.save(any(User.class))).thenAnswer(invocation -> (User) invocation.getArgument(0));
         when(jwtService.generateToken(any())).thenReturn("token");
+        when(refreshTokenService.createRefreshToken(any(),any())).thenReturn(new RefreshToken());
 
         userService.register(request);
 
@@ -110,35 +121,61 @@ public class UserServiceTest {
 
         LoginRequestDTO request = new LoginRequestDTO(
           "daniel@email.com",
-          "123456789"
+          "123456789",
+                "daniel"
         );
 
         User user = new User(new UserRequestDTO
                 (
                         "daniel@email.com",
                         "hashedPassword",
-                        "Daniel"
+                        "Daniel",
+                        "daniel"
                 ),
                 "hashedPassword"
         );
 
         when(repository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
         when(jwtService.generateToken(user.getEmail())).thenReturn("token");
+        when(refreshTokenService.createRefreshToken(user,"daniel")).thenReturn(new RefreshToken());
 
         AuthResponseDTO response = userService.login(request);
 
         assertNotNull(response);
-        assertNotNull(response.getToken());
+        assertNotNull(response.getAccessToken());
         assertEquals("daniel@email.com", response.getUser().getEmail());
 
-        }
+    }
+
+    @Test
+    void shouldRefreshTokenSuccessfully() {
+        RefreshRequestDTO request = new RefreshRequestDTO("refresh-token-valido");
+
+        User user = new User(
+                new UserRequestDTO("daniel@email.com", "hashedPassword", "Daniel", "device-1"),
+                "hashedPassword"
+        );
+
+        RefreshToken refreshToken = new RefreshToken(user, "refresh-token-valido", "device-1", LocalDateTime.now().plusDays(7));
+
+        when(refreshTokenService.validateRefreshToken(request.getRefreshToken())).thenReturn(refreshToken);
+        when(jwtService.generateToken(user.getEmail())).thenReturn("novo-access-token");
+
+        AuthResponseDTO response = userService.refresh(request);
+
+        assertNotNull(response);
+        assertEquals("novo-access-token", response.getAccessToken());
+        assertEquals("refresh-token-valido", response.getRefreshToken());
+        assertEquals("daniel@email.com", response.getUser().getEmail());
+    }
 
     @Test
     void shouldThrowExceptionWhenUserNotFoundOnLogin() {
 
         LoginRequestDTO request = new LoginRequestDTO(
                 "daniel@email.com",
-                "123456789"
+                "123456789",
+                "daniel"
         );
 
         when(authenticationManager.authenticate(any())).thenThrow(new UsernameNotFoundException("Credenciais inválidas"));
@@ -153,7 +190,8 @@ public class UserServiceTest {
 
         LoginRequestDTO request = new LoginRequestDTO(
                 "daniel@email.com",
-                "senha123"
+                "senha123",
+                "daniel"
         );
 
         when(repository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
@@ -161,8 +199,6 @@ public class UserServiceTest {
         assertThrows(UsernameNotFoundException.class, () -> userService.login(request));
 
     }
-
-
 
 
     }

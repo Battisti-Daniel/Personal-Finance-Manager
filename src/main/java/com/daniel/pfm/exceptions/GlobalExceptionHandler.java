@@ -1,7 +1,6 @@
 package com.daniel.pfm.exceptions;
 
 import com.daniel.pfm.dtos.Error.ErrorResponseDTO;
-import com.sun.net.httpserver.HttpsServer;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +9,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -53,4 +51,20 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR.value(), List.of("An unexpected error occurred")));
     }
 
+    @ExceptionHandler(RefreshTokenExpiredException.class)
+    public ResponseEntity<ErrorResponseDTO> handleRefreshTokenExpiredException(RefreshTokenExpiredException ex){
+
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponseDTO(HttpStatus.UNAUTHORIZED.value(), List.of(ex.getMessage())));
+    }
+
+    @ExceptionHandler(RefreshTokenNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleRefreshTokenNotFoundException(RefreshTokenNotFoundException ex){
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponseDTO(HttpStatus.UNAUTHORIZED.value(), List.of(ex.getMessage())));
+    }
+
 }
+

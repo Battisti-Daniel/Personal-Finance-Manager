@@ -1,15 +1,14 @@
 package com.daniel.pfm.dtos.Auth;
 
-import com.daniel.pfm.dtos.User.UserResponseDTO;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor
-public class AuthResponseDTO {
-
-    private String accessToken;
+public class RefreshRequestDTO {
+    @NotBlank
     private String refreshToken;
-    private UserResponseDTO user;
-
 }

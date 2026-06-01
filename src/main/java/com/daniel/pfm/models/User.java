@@ -37,6 +37,9 @@ public class User implements UserDetails {
     @JoinColumn(name = "budget_id", referencedColumnName = "id")
     private Budget budget;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RefreshToken> token;
+
     @CreationTimestamp
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;

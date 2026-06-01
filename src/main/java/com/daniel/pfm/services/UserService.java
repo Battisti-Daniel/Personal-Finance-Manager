@@ -1,10 +1,12 @@
 package com.daniel.pfm.services;
 
 import com.daniel.pfm.dtos.Auth.AuthResponseDTO;
+import com.daniel.pfm.dtos.Auth.RefreshRequestDTO;
 import com.daniel.pfm.dtos.Login.LoginRequestDTO;
 import com.daniel.pfm.dtos.User.UserRequestDTO;
 import com.daniel.pfm.dtos.User.UserResponseDTO;
 import com.daniel.pfm.exceptions.UserAlreadyExistsException;
+import com.daniel.pfm.models.RefreshToken;
 import com.daniel.pfm.models.User;
 import com.daniel.pfm.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -22,6 +24,7 @@ public class UserService {
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
     private final AuthenticationManager authenticationManager;
 
     @Transactional
@@ -35,12 +38,14 @@ public class UserService {
 
         repository.save(user);
 
-        String token = jwtService.generateToken(user.getEmail());
+        String accessToken = jwtService.generateToken(user.getEmail());
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user, entity.getDeviceId());
 
-        return new AuthResponseDTO(token, new UserResponseDTO(user));
+        return new AuthResponseDTO(accessToken, refreshToken.getToken(), new UserResponseDTO(user));
 
     }
 
+    @Transactional
     public AuthResponseDTO login(LoginRequestDTO entity){
 
         authenticationManager.authenticate(
@@ -53,9 +58,23 @@ public class UserService {
                 () -> new UsernameNotFoundException("Usuario não encontrado")
         );
 
-        String token = jwtService.generateToken(user.getEmail());
+        String accessToken = jwtService.generateToken(user.getEmail());
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user, entity.getDeviceId());
 
-        return new AuthResponseDTO(token, new UserResponseDTO(user));
+        return new AuthResponseDTO(accessToken, refreshToken.getToken(), new UserResponseDTO(user));
+
+    }
+
+    @Transactional
+    public AuthResponseDTO refresh(RefreshRequestDTO entity){
+
+        RefreshToken refreshToken = refreshTokenService.validateRefreshToken(entity.getRefreshToken());
+
+        User user = refreshToken.getUser();
+
+        String newAccessToken = jwtService.generateToken(user.getEmail());
+
+        return new AuthResponseDTO(newAccessToken, refreshToken.getToken(), new UserResponseDTO(user));
 
     }
 
@@ -66,6 +85,5 @@ public class UserService {
         return new User(userDTO, hashedPassword);
 
     }
-
 
 }
