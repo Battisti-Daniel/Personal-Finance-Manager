@@ -57,6 +57,10 @@ public class CategoryController {
     @PutMapping("/{id}")
     public ResponseEntity<CategoryPutDTO> put(@PathVariable UUID id, @RequestBody CategoryPutDTO entity ,Authentication authentication){
 
+        if(entity.isEmpty()){
+            return ResponseEntity.noContent().build();
+        }
+
         CategoryPutDTO response = service.update(id, entity, authentication.getName());
 
         return ResponseEntity.ok().body(response);

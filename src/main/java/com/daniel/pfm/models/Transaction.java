@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -19,6 +20,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 public class Transaction {
 
     @Id
@@ -48,14 +50,14 @@ public class Transaction {
 
     private  String notes;
 
-    private LocalDateTime deleted_at;
+    private LocalDateTime deletedAt;
 
     @CreationTimestamp
     @Column(nullable = false)
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    private LocalDateTime updated_at;
+    private LocalDateTime updatedAt;
 
     public Transaction(TransactionRequestDTO entity, User user, Category category) {
         this.notes = entity.getNotes();

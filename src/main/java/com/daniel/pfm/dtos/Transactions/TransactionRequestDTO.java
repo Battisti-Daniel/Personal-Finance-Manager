@@ -1,6 +1,7 @@
 package com.daniel.pfm.dtos.Transactions;
 
 import com.daniel.pfm.models.User;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,8 +18,7 @@ public class TransactionRequestDTO {
 
     @NotNull
     private UUID categoryId;
-    @NotNull
-    private User user;
+    @NotBlank
     @NotNull
     private String description;
     @NotNull

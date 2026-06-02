@@ -1,18 +1,40 @@
 package com.daniel.pfm.services;
 
+import com.daniel.pfm.dtos.Error.CsvImportErrorDTO;
+import com.daniel.pfm.dtos.Transactions.TransactionPutDTO;
 import com.daniel.pfm.dtos.Transactions.TransactionRequestDTO;
 import com.daniel.pfm.dtos.Transactions.TransactionResponseDTO;
+import com.daniel.pfm.dtos.csv.CSVImportResponseDTO;
+import com.daniel.pfm.enums.TransactionType;
 import com.daniel.pfm.exceptions.CategoryDoesNotExistsException;
+import com.daniel.pfm.exceptions.TransactionalNotFoundException;
 import com.daniel.pfm.models.Category;
 import com.daniel.pfm.models.Transaction;
 import com.daniel.pfm.models.User;
 import com.daniel.pfm.repository.CategoryRepository;
 import com.daniel.pfm.repository.TransactionalRepository;
 import com.daniel.pfm.repository.UserRepository;
+import com.daniel.pfm.specification.TransactionSpecification;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -40,4 +62,177 @@ public class TransactionService {
 
     }
 
+    public TransactionResponseDTO detail(UUID id, String name) {
+
+        User user = userRepository.findByEmail(name)
+                .orElseThrow(
+                        () -> new UsernameNotFoundException("Usuario não encontrado")
+                );
+        Transaction transaction = repository.findByIdAndUser(id, user)
+                .orElseThrow(TransactionalNotFoundException::new);
+
+        return new TransactionResponseDTO(transaction);
+
+    }
+
+    public Page<TransactionResponseDTO> findAll(String email, String month, UUID categoryId, TransactionType type, Pageable pageable) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new UsernameNotFoundException("Usuario não encontrado")
+                );
+
+        Specification<Transaction> spec = Specification
+                .where(TransactionSpecification.byUser(user))
+                .and(TransactionSpecification.byMonth(month))
+                .and(TransactionSpecification.byCategoryId(categoryId))
+                .and(TransactionSpecification.byType(type));
+
+        return repository.findAll(spec, pageable).map(TransactionResponseDTO::new);
+
+    }
+    @Transactional
+    public TransactionResponseDTO update(UUID id, TransactionPutDTO transactionRequestDTO, String name) {
+
+        User user = userRepository.findByEmail(name)
+                .orElseThrow(
+                        () -> new UsernameNotFoundException("Usuario não encontrado")
+                );
+
+        Transaction transaction = repository.findByIdAndUser(id, user).orElseThrow(
+                TransactionalNotFoundException::new
+        );
+
+        transaction = changeValues(transactionRequestDTO, transaction);
+
+        repository.save(transaction);
+
+        return new TransactionResponseDTO(transaction);
+
+    }
+
+    @Transactional
+    public void delete(UUID id, String name) {
+
+        User user = userRepository.findByEmail(name).orElseThrow(
+                () -> new UsernameNotFoundException("Usuario não encontrado")
+        );
+
+        Transaction transaction = repository.findByIdAndUser(id, user).orElseThrow(
+                TransactionalNotFoundException::new
+        );
+
+        repository.delete(transaction);
+
+    }
+
+    @Transactional
+    public CSVImportResponseDTO importCsv(MultipartFile file, String name) {
+
+        User user = userRepository.findByEmail(name).orElseThrow(
+                () -> new UsernameNotFoundException("Usuario não encontrado")
+        );
+
+        List<CsvImportErrorDTO> errors = new ArrayList<>();
+        List<Transaction> transactions = new ArrayList<>();
+
+        try(CSVReader reader = new CSVReader(new InputStreamReader(file.getInputStream()))){
+
+            String[] line;
+
+            int lineNumber = 1;
+            reader.readNext();
+
+            while((line = reader.readNext()) != null){
+                lineNumber += 1;
+                try{
+                    if(line.length < 4){
+                        errors.add(new CsvImportErrorDTO(lineNumber, "Linha com colunas insuficientes"));
+                        continue;
+                    }
+
+                    String dateStr = line[0].trim();
+                    String description = line[1].trim();
+                    String amountStr = line[2].trim();
+                    String categoryIdStr = line[3].trim();
+                    String notes = line.length > 4 ? line[4].trim() : null;
+
+                    LocalDate date;
+
+                    try{
+                        date = LocalDate.parse(dateStr);
+                    }catch (DateTimeParseException ex){
+                        errors.add(new CsvImportErrorDTO(lineNumber, "Data inválida: " + dateStr));
+                        continue;
+                    }
+
+                    if (description.isBlank()){
+                        errors.add(new CsvImportErrorDTO(lineNumber, "Descrição não pode ser vazia"));
+                        continue;
+                    }
+
+                    BigDecimal amount;
+
+                    try{
+                        amount = new BigDecimal(amountStr);
+                        if(amount.compareTo(BigDecimal.ZERO) <= 0){
+                            errors.add(new CsvImportErrorDTO(lineNumber, "Valor deve ser maior que zero: " + amountStr));
+                            continue;
+                        }
+                    }catch (NumberFormatException ex){
+                        errors.add(new CsvImportErrorDTO(lineNumber, "Valor inválido: " + amountStr));
+                        continue;
+                    }
+
+                    UUID categoryId;
+                    try {
+                        categoryId = UUID.fromString(categoryIdStr);
+                    } catch (IllegalArgumentException e) {
+                        errors.add(new CsvImportErrorDTO(lineNumber, "CategoryId inválido: " + categoryIdStr));
+                        continue;
+                    }
+
+                    Category category = categoryRepository.findByIdAndUser(categoryId, user)
+                            .orElse(null);
+                    if (category == null) {
+                        errors.add(new CsvImportErrorDTO(lineNumber, "Categoria não encontrada: " + categoryIdStr));
+                        continue;
+                    }
+
+                    transactions.add(new Transaction(
+                            new TransactionRequestDTO(categoryId, description, amount, date, notes),
+                            user,
+                            category
+                    ));
+                }catch (Exception e){
+                    errors.add(new CsvImportErrorDTO(lineNumber, "Erro inesperado: " + e.getMessage()));
+                }
+            }
+
+            if (transactions.isEmpty() && errors.isEmpty()) {
+                throw new RuntimeException("Arquivo CSV vazio ou sem transações válidas");
+            }
+
+            if(!errors.isEmpty()){
+                TransactionSynchronizationManager.getCurrentTransactionName();
+                return new CSVImportResponseDTO(0, errors.size(), errors);
+            }
+
+            repository.saveAll(transactions);
+
+            return new CSVImportResponseDTO(transactions.size(), 0, List.of());
+
+        }catch (CsvValidationException | IOException e){
+            throw new RuntimeException("Erro ao processar o arquivo CSV: " + e.getMessage());
+        }
+
+    }
+
+    private Transaction changeValues(TransactionPutDTO newEntity, Transaction entity) {
+        if (newEntity.getDescription() != null) entity.setDescription(newEntity.getDescription());
+        if (newEntity.getAmount() != null) entity.setAmount(newEntity.getAmount());
+        if (newEntity.getNotes() != null) entity.setNotes(newEntity.getNotes());
+        if (newEntity.getDate() != null) entity.setDate(newEntity.getDate());
+        return entity;
+    }
 }

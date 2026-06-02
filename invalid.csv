@@ -1,0 +1,5 @@
+date,description,amount,categoryId,notes
+2026-13-45,Mercado,245.80,19dbe328-1fcc-46b8-8990-8ffc23404a8e,Data inválida
+2026-01-20,,180.00,19dbe328-1fcc-46b8-8990-8ffc23404a8e,Descrição vazia
+2026-01-21,Uber,-50.00,19dbe328-1fcc-46b8-8990-8ffc23404a8e,Valor negativo
+2026-01-22,Netflix,99.90,uuid-invalido,CategoryId inválido

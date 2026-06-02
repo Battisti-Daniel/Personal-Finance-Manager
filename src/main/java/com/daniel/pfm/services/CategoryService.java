@@ -82,10 +82,6 @@ public class CategoryService {
                         () -> new UsernameNotFoundException("Usuario não encontrado")
                 );
 
-        if (repository.existsByIdAndUser(id, user)) {
-            throw new CategoryDoesNotExistsException();
-        }
-
         Category oldValue = repository.findByIdAndUser(id, user)
                 .orElseThrow(
                         CategoryDoesNotExistsException::new
@@ -106,7 +102,7 @@ public class CategoryService {
                         () -> new UsernameNotFoundException("Usuario não encontrado")
                 );
 
-        if (repository.existsByIdAndUser(id, user)) {
+        if (!repository.existsByIdAndUser(id, user)) {
             throw new CategoryDoesNotExistsException();
         }
 

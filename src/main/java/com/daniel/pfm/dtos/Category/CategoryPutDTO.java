@@ -26,4 +26,8 @@ public class CategoryPutDTO {
         this.color = entity.getColor();
         this.icon = entity.getIcon();
     }
+
+    public boolean isEmpty(){
+        return name == null && type == null && color == null && icon == null;
+    }
 }

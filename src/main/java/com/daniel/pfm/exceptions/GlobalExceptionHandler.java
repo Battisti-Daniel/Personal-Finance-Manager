@@ -1,9 +1,14 @@
 package com.daniel.pfm.exceptions;
 
 import com.daniel.pfm.dtos.Error.ErrorResponseDTO;
+import com.daniel.pfm.dtos.Error.FieldErrorDto;
+import com.daniel.pfm.dtos.Error.ValidationErrorResponseDTO;
+import com.sun.net.httpserver.HttpsServer;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,17 +19,21 @@ import java.util.List;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponseDTO> handleValidationException(MethodArgumentNotValidException ex){
+    public ResponseEntity<ValidationErrorResponseDTO> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request){
 
-        List<String> message = ex.getBindingResult()
+        List<FieldErrorDto> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .map(error -> new FieldErrorDto(error.getField(), error.getDefaultMessage()))
                 .toList();
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponseDTO(HttpStatus.BAD_REQUEST.value(), message));
+                .body(new ValidationErrorResponseDTO(
+                        HttpStatus.BAD_REQUEST.value(),
+                        request.getRequestURI(),
+                        errors
+                ));
 
     }
 
@@ -81,6 +90,20 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponseDTO(HttpStatus.NOT_FOUND.value(), List.of(ex.getMessage())));
 
     }
+
+    @ExceptionHandler(TransactionalNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleTransactionNotFoundException(TransactionalNotFoundException ex){
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponseDTO(HttpStatus.NOT_FOUND.value(), List.of(ex.getMessage())));
+    }
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponseDTO> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        return ResponseEntity.badRequest().body(
+                new ErrorResponseDTO(400, List.of(ex.getMostSpecificCause().getMessage()))
+        );
+    }
+
 
 }
 
