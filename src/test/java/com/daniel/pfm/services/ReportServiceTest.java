@@ -111,7 +111,7 @@ class ReportServiceTest {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(transactionalRepository.sumByCategoryAndUserAndTypeAndDataBetween(
                 eq(user), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(List.of(row));
+                .thenReturn(List.<Object[]>of(row));
         when(budgetRepository.findByCategoryAndYearMonth(category, month)).thenReturn(Optional.empty());
 
         List<CategorySummaryDTO> result = service.getCategorySummary(user.getEmail(), month, TransactionType.EXPENSE);
@@ -134,7 +134,7 @@ class ReportServiceTest {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(transactionalRepository.sumByCategoryAndUserAndTypeAndDataBetween(
                 eq(user), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(List.of(row));
+                .thenReturn(List.<Object[]>of(row));
         when(budgetRepository.findByCategoryAndYearMonth(category, month)).thenReturn(Optional.of(budget));
 
         List<CategorySummaryDTO> result = service.getCategorySummary(user.getEmail(), month, TransactionType.EXPENSE);

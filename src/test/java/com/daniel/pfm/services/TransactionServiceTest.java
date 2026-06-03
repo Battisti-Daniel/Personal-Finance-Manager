@@ -89,7 +89,7 @@ public class TransactionServiceTest {
     @Test
     void shouldCreateTransaction() {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(categoryRepository.findByIdAndUserAndDeletedAtIsNull(category.getId(), user)).thenReturn(Optional.of(category));
+        when(categoryRepository.findByIdAndUser(category.getId(), user)).thenReturn(Optional.of(category));
         when(repository.saveAndFlush(any(Transaction.class))).thenReturn(transaction);
 
         TransactionResponseDTO response = service.create(transactionRequestDTO, user.getEmail());
@@ -116,7 +116,7 @@ public class TransactionServiceTest {
     @Test
     void shouldThrowExceptionWhenCategoryNotFoundOnCreate() {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(categoryRepository.findByIdAndUserAndDeletedAtIsNull(any(), eq(user))).thenReturn(Optional.empty());
+        when(categoryRepository.findByIdAndUser(any(), eq(user))).thenReturn(Optional.empty());
 
         assertThrows(Exception.class, () ->
                 service.create(transactionRequestDTO, user.getEmail())
@@ -199,7 +199,7 @@ public class TransactionServiceTest {
         service.delete(transaction.getId(), user.getEmail());
 
         verify(repository, times(1)).save(transaction);
-        verify(repository, never()).delete(any());
+        verify(repository, never()).delete(any(Transaction.class));
         assertNotNull(transaction.getDeletedAt());
     }
 
