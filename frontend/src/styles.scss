@@ -1,0 +1,154 @@
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary:    #3b5bdb;
+  --primary-lt: #e7f0ff;
+  --income:     #2f9e44;
+  --income-lt:  #ebf9ee;
+  --expense:    #c92a2a;
+  --expense-lt: #fff0f0;
+  --balance:    #1971c2;
+  --balance-lt: #e8f4ff;
+  --surface:    #ffffff;
+  --bg:         #f1f3f9;
+  --border:     #e2e8f0;
+  --text:       #1e293b;
+  --muted:      #64748b;
+  --radius:     10px;
+  --shadow:     0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.05);
+  --shadow-md:  0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.05);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Cards ─── */
+.pfm-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+/* ─── Summary cards ─── */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.summary-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  .card-left { display: flex; flex-direction: column; gap: 6px; }
+  .label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+  .value { font-size: 26px; font-weight: 700; line-height: 1.1; }
+  .sub   { font-size: 12px; color: var(--muted); }
+
+  .card-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    mat-icon { font-size: 22px; width: 22px; height: 22px; }
+  }
+
+  &.income  .value     { color: var(--income); }
+  &.income  .card-icon { background: var(--income-lt); color: var(--income); }
+  &.expense .value     { color: var(--expense); }
+  &.expense .card-icon { background: var(--expense-lt); color: var(--expense); }
+  &.balance .value     { color: var(--balance); }
+  &.balance .card-icon { background: var(--balance-lt); color: var(--balance); }
+}
+
+/* ─── Page headers ─── */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  h1 { font-size: 20px; font-weight: 600; color: var(--text); }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+
+    h1 { font-size: 18px; }
+  }
+}
+
+/* ─── Tables ─── */
+.mat-mdc-table { width: 100%; }
+.mat-mdc-header-cell { color: var(--muted) !important; font-size: 11px !important; font-weight: 600 !important; text-transform: uppercase; letter-spacing: .5px; }
+.mat-mdc-row:hover { background: #f8fafc; }
+
+/* ─── Status chips ─── */
+.chip {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .3px;
+}
+.chip-income  { background: var(--income-lt);  color: var(--income); }
+.chip-expense { background: var(--expense-lt); color: var(--expense); }
+
+/* ─── Month input ─── */
+.month-input {
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  cursor: pointer;
+  &:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,91,219,.1); }
+}
+
+/* ─── Snackbar ─── */
+.success-snack { --mdc-snackbar-container-color: var(--income); --mdc-snackbar-supporting-text-color: #fff; }
+.error-snack   { --mdc-snackbar-container-color: var(--expense); --mdc-snackbar-supporting-text-color: #fff; }
+
+/* ─── Utility ─── */
+.flex-gap   { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.mt-16      { margin-top: 16px; }
+.full-width { width: 100%; }
+.no-data    { color: var(--muted); text-align: center; padding: 48px 0; font-size: 14px; }
+.center-spinner { display: flex; justify-content: center; padding: 64px; }
+
+@media (max-width: 480px) {
+  .flex-gap { gap: 8px; }
+}
+
+/* ─── Button tweaks ─── */
+.mat-mdc-raised-button.mat-primary { border-radius: 8px !important; font-size: 13px !important; font-weight: 600 !important; }
+.mat-mdc-outlined-button            { border-radius: 8px !important; font-size: 13px !important; }
