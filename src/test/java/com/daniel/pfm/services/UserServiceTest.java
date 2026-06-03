@@ -170,6 +170,23 @@ public class UserServiceTest {
     }
 
     @Test
+    void shouldReturnUserInformation(){
+
+        User user = new User(
+                new UserRequestDTO("daniel@email.com", "hashedPassword", "Daniel", "device-1"),
+                "hashedPassword"
+        );
+
+        when(repository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+
+        UserResponseDTO response = userService.me(user.getEmail());
+
+        assertNotNull(response);
+        assertEquals("daniel@email.com", response.getEmail());
+
+    }
+
+    @Test
     void shouldThrowExceptionWhenUserNotFoundOnLogin() {
 
         LoginRequestDTO request = new LoginRequestDTO(

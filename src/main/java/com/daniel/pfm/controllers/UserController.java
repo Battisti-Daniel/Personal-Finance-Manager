@@ -16,13 +16,12 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
-    @PostMapping("/register")
+    @PostMapping("/api/v1/auth/register")
     public ResponseEntity<AuthResponseDTO> registerUser(@Valid @RequestBody UserRequestDTO entity) {
 
         AuthResponseDTO response = userService.register(entity);
@@ -36,7 +35,7 @@ public class UserController {
 
     }
 
-    @PostMapping("/login")
+    @PostMapping("/api/v1/auth/login")
     public ResponseEntity<AuthResponseDTO> loginUser(@Valid @RequestBody LoginRequestDTO loginRequestDTO){
 
         AuthResponseDTO response = userService.login(loginRequestDTO);
@@ -45,7 +44,7 @@ public class UserController {
 
     }
 
-    @PostMapping("/refresh")
+    @PostMapping("/api/v1/auth/refresh")
     public ResponseEntity<AuthResponseDTO> refresh(@Valid @RequestBody RefreshRequestDTO entity){
 
         AuthResponseDTO response = userService.refresh(entity);
@@ -54,7 +53,7 @@ public class UserController {
 
     }
 
-    @GetMapping("/me")
+    @GetMapping("/api/v1/users/me")
     public ResponseEntity<UserResponseDTO> me(Authentication authentication){
 
         UserResponseDTO response = userService.me(authentication.getName());

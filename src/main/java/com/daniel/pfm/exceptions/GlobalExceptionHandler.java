@@ -3,7 +3,6 @@ package com.daniel.pfm.exceptions;
 import com.daniel.pfm.dtos.Error.ErrorResponseDTO;
 import com.daniel.pfm.dtos.Error.FieldErrorDto;
 import com.daniel.pfm.dtos.Error.ValidationErrorResponseDTO;
-import com.sun.net.httpserver.HttpsServer;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -40,9 +39,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponseDTO> handleDataIntegrityViolationException(DataIntegrityViolationException ex){
 
+        String message = ex.getMostSpecificCause().getMessage();
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(new ErrorResponseDTO(HttpStatus.CONFLICT.value(), List.of("Data integrity violation: Ajuste")));
+                .body(new ErrorResponseDTO(HttpStatus.CONFLICT.value(), List.of(message)));
 
     }
 

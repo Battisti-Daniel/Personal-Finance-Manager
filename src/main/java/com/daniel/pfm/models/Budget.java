@@ -1,17 +1,22 @@
 package com.daniel.pfm.models;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 @Table(name = "budget")
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
 public class Budget {
 
     @Id
@@ -28,13 +33,13 @@ public class Budget {
     private BigDecimal amount;
 
     @Column(unique = true)
-    private Date year_month;
+    private LocalDateTime yearMonth;
 
     @CreationTimestamp
     @Column(nullable = false)
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    private LocalDateTime updated_at;
+    private LocalDateTime updatedAt;
 
 }
