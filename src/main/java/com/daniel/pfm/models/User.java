@@ -2,6 +2,9 @@ package com.daniel.pfm.models;
 
 import com.daniel.pfm.dtos.User.UserRequestDTO;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,6 +17,9 @@ import java.util.UUID;
 
 @Table(name = "users")
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
 public class User implements UserDetails {
 
     @Id
@@ -22,8 +28,10 @@ public class User implements UserDetails {
 
     @Column(nullable = false, unique = true)
     private String email;
+
     @Column(nullable = false)
     private String password;
+
     @Column(nullable = false, length = 100)
     private String name;
 
@@ -43,24 +51,15 @@ public class User implements UserDetails {
     @CreationTimestamp
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
+
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
+    // UserDetails — getUsername usa o campo email
+    @Override
+    public String getUsername() {
+        return this.email;
     }
 
     @Override
@@ -68,90 +67,15 @@ public class User implements UserDetails {
         return List.of();
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getUsername() {
-        return this.email;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<Category> getCategories() {
-        return categories;
-    }
-
-    public void setCategories(List<Category> categories) {
-        this.categories = categories;
-    }
-
-    public List<Transaction> getTransaction() {
-        return transaction;
-    }
-
-    public void setTransaction(List<Transaction> transaction) {
-        this.transaction = transaction;
-    }
-
-    public Budget getBudget() {
-        return budget;
-    }
-
-    public void setBudget(Budget budget) {
-        this.budget = budget;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public User(UUID id, String email, String password, String name, List<Category> categories, List<Transaction> transaction, Budget budget, LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.id = id;
-        this.email = email;
-        this.password = password;
-        this.name = name;
-        this.categories = categories;
-        this.transaction = transaction;
-        this.budget = budget;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
-
     public User(UserRequestDTO entity) {
         this.email = entity.getEmail();
         this.password = entity.getPassword();
         this.name = entity.getName();
     }
+
     public User(UserRequestDTO entity, String hashedPassword) {
         this.email = entity.getEmail();
         this.password = hashedPassword;
         this.name = entity.getName();
-    }
-
-    public User() {
     }
 }

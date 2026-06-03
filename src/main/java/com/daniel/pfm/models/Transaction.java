@@ -45,7 +45,7 @@ public class Transaction {
     @Column(nullable = false)
     private TransactionType type;
 
-    @CreationTimestamp
+    @Column(nullable = false)
     private LocalDate date;
 
     private  String notes;

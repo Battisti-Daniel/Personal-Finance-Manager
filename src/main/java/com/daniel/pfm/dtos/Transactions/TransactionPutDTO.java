@@ -1,7 +1,7 @@
 package com.daniel.pfm.dtos.Transactions;
 
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -10,6 +10,7 @@ import java.time.LocalDate;
 public class TransactionPutDTO {
 
     private String description;
+    @Positive
     private BigDecimal amount;
     private String notes;
     private LocalDate date;

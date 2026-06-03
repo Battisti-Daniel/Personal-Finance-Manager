@@ -89,7 +89,7 @@ public class TransactionServiceTest {
     @Test
     void shouldCreateTransaction() {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(categoryRepository.findByIdAndUser(category.getId(), user)).thenReturn(Optional.of(category));
+        when(categoryRepository.findByIdAndUserAndDeletedAtIsNull(category.getId(), user)).thenReturn(Optional.of(category));
         when(repository.saveAndFlush(any(Transaction.class))).thenReturn(transaction);
 
         TransactionResponseDTO response = service.create(transactionRequestDTO, user.getEmail());
@@ -116,7 +116,7 @@ public class TransactionServiceTest {
     @Test
     void shouldThrowExceptionWhenCategoryNotFoundOnCreate() {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(categoryRepository.findByIdAndUser(any(), eq(user))).thenReturn(Optional.empty());
+        when(categoryRepository.findByIdAndUserAndDeletedAtIsNull(any(), eq(user))).thenReturn(Optional.empty());
 
         assertThrows(Exception.class, () ->
                 service.create(transactionRequestDTO, user.getEmail())
@@ -126,7 +126,7 @@ public class TransactionServiceTest {
     @Test
     void shouldReturnDetailFromSingleTransaction() {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(repository.findByIdAndUser(transaction.getId(), user)).thenReturn(Optional.of(transaction));
+        when(repository.findByIdAndUserAndDeletedAtIsNull(transaction.getId(), user)).thenReturn(Optional.of(transaction));
 
         TransactionResponseDTO response = service.detail(transaction.getId(), user.getEmail());
 
@@ -139,7 +139,7 @@ public class TransactionServiceTest {
     @Test
     void shouldThrowExceptionWhenTransactionNotFound() {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(repository.findByIdAndUser(any(), eq(user))).thenReturn(Optional.empty());
+        when(repository.findByIdAndUserAndDeletedAtIsNull(any(), eq(user))).thenReturn(Optional.empty());
 
         assertThrows(TransactionalNotFoundException.class, () ->
                 service.detail(UUID.randomUUID(), user.getEmail())
@@ -153,7 +153,7 @@ public class TransactionServiceTest {
         ), "pass");
 
         when(userRepository.findByEmail(otherUser.getEmail())).thenReturn(Optional.of(otherUser));
-        when(repository.findByIdAndUser(transaction.getId(), otherUser)).thenReturn(Optional.empty());
+        when(repository.findByIdAndUserAndDeletedAtIsNull(transaction.getId(), otherUser)).thenReturn(Optional.empty());
 
         assertThrows(TransactionalNotFoundException.class, () ->
                 service.detail(transaction.getId(), otherUser.getEmail())
@@ -169,7 +169,7 @@ public class TransactionServiceTest {
         when(putDTO.getDate()).thenReturn(null);
 
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(repository.findByIdAndUser(transaction.getId(), user)).thenReturn(Optional.of(transaction));
+        when(repository.findByIdAndUserAndDeletedAtIsNull(transaction.getId(), user)).thenReturn(Optional.of(transaction));
         when(repository.save(any(Transaction.class))).thenReturn(transaction);
 
         TransactionResponseDTO response = service.update(transaction.getId(), putDTO, user.getEmail());
@@ -184,22 +184,24 @@ public class TransactionServiceTest {
         TransactionPutDTO putDTO = mock(TransactionPutDTO.class);
 
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(repository.findByIdAndUser(any(), eq(user))).thenReturn(Optional.empty());
+        when(repository.findByIdAndUserAndDeletedAtIsNull(any(), eq(user))).thenReturn(Optional.empty());
 
         assertThrows(TransactionalNotFoundException.class, () ->
                 service.update(UUID.randomUUID(), putDTO, user.getEmail())
         );
     }
 
-
     @Test
-    void shouldDeleteTransaction() {
+    void shouldSoftDeleteTransaction() {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(repository.findByIdAndUser(transaction.getId(), user)).thenReturn(Optional.of(transaction));
+        when(repository.findByIdAndUserAndDeletedAtIsNull(transaction.getId(), user)).thenReturn(Optional.of(transaction));
 
         service.delete(transaction.getId(), user.getEmail());
 
-        verify(repository, times(1)).delete(transaction);
+        // soft delete: salva com deletedAt preenchido, não chama delete físico
+        verify(repository, times(1)).save(transaction);
+        verify(repository, never()).delete(any());
+        assertNotNull(transaction.getDeletedAt());
     }
 
     @Test
@@ -209,13 +211,12 @@ public class TransactionServiceTest {
         ), "pass");
 
         when(userRepository.findByEmail(otherUser.getEmail())).thenReturn(Optional.of(otherUser));
-        when(repository.findByIdAndUser(transaction.getId(), otherUser)).thenReturn(Optional.empty());
+        when(repository.findByIdAndUserAndDeletedAtIsNull(transaction.getId(), otherUser)).thenReturn(Optional.empty());
 
         assertThrows(TransactionalNotFoundException.class, () ->
                 service.delete(transaction.getId(), otherUser.getEmail())
         );
     }
-
 
     @Test
     void shouldReturnPagedTransactions() {

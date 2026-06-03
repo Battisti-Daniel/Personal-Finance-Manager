@@ -43,6 +43,10 @@ public class TransactionSpecification {
 
     }
 
+    public static Specification<Transaction> notDeleted(){
+        return ((root, query, cb) -> cb.isNull(root.get("deletedAt")));
+    }
+
 
 
 }

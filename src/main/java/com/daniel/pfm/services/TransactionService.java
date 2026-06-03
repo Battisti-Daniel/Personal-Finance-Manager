@@ -24,13 +24,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +68,7 @@ public class TransactionService {
                 .orElseThrow(
                         () -> new UsernameNotFoundException("Usuario não encontrado")
                 );
-        Transaction transaction = repository.findByIdAndUser(id, user)
+        Transaction transaction = repository.findByIdAndUserAndDeletedAtIsNull(id, user)
                 .orElseThrow(TransactionalNotFoundException::new);
 
         return new TransactionResponseDTO(transaction);
@@ -86,7 +86,8 @@ public class TransactionService {
                 .where(TransactionSpecification.byUser(user))
                 .and(TransactionSpecification.byMonth(month))
                 .and(TransactionSpecification.byCategoryId(categoryId))
-                .and(TransactionSpecification.byType(type));
+                .and(TransactionSpecification.byType(type))
+                .and(TransactionSpecification.notDeleted());
 
         return repository.findAll(spec, pageable).map(TransactionResponseDTO::new);
 
@@ -99,7 +100,7 @@ public class TransactionService {
                         () -> new UsernameNotFoundException("Usuario não encontrado")
                 );
 
-        Transaction transaction = repository.findByIdAndUser(id, user).orElseThrow(
+        Transaction transaction = repository.findByIdAndUserAndDeletedAtIsNull(id, user).orElseThrow(
                 TransactionalNotFoundException::new
         );
 
@@ -118,11 +119,12 @@ public class TransactionService {
                 () -> new UsernameNotFoundException("Usuario não encontrado")
         );
 
-        Transaction transaction = repository.findByIdAndUser(id, user).orElseThrow(
+        Transaction transaction = repository.findByIdAndUserAndDeletedAtIsNull(id, user).orElseThrow(
                 TransactionalNotFoundException::new
         );
 
-        repository.delete(transaction);
+        transaction.setDeletedAt(LocalDateTime.now());
+        repository.save(transaction);
 
     }
 
@@ -214,7 +216,6 @@ public class TransactionService {
             }
 
             if(!errors.isEmpty()){
-                TransactionSynchronizationManager.getCurrentTransactionName();
                 return new CSVImportResponseDTO(0, errors.size(), errors);
             }
 
