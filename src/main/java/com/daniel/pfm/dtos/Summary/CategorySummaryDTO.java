@@ -1,18 +1,27 @@
 package com.daniel.pfm.dtos.Summary;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @Getter
-@AllArgsConstructor
 public class CategorySummaryDTO {
 
-    private UUID categoryId;
-    private String categoryName;
-    private BigDecimal total;
-    private BigDecimal percentage;
+    private final UUID categoryId;
+    private final String categoryName;
+    private final BigDecimal total;
+    private final BigDecimal percentage;
+    private final BigDecimal budgetAmount;
+    private final BigDecimal budgetUsedPercentage;
 
+    public CategorySummaryDTO(UUID categoryId, String categoryName, BigDecimal total,
+                               BigDecimal percentage, BigDecimal budgetAmount, BigDecimal budgetUsedPercentage) {
+        this.categoryId = categoryId;
+        this.categoryName = categoryName;
+        this.total = total;
+        this.percentage = percentage;
+        this.budgetAmount = budgetAmount;
+        this.budgetUsedPercentage = budgetUsedPercentage;
+    }
 }

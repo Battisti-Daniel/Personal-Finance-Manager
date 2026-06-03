@@ -41,10 +41,6 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Transaction> transaction;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "budget_id", referencedColumnName = "id")
-    private Budget budget;
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RefreshToken> token;
 

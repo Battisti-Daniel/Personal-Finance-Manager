@@ -1,5 +1,6 @@
 package com.daniel.pfm.dtos.Transactions;
 
+import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 
@@ -13,6 +14,7 @@ public class TransactionPutDTO {
     @Positive
     private BigDecimal amount;
     private String notes;
+    @PastOrPresent(message = "A data não pode ser futura")
     private LocalDate date;
 
     public boolean isEmpty(){

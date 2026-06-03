@@ -13,6 +13,7 @@ import java.util.List;
 public class CSVImportResponseDTO {
 
     private int imported;
+    private int autoCategorized;
     private int rejected;
     private List<CsvImportErrorDTO> errors;
 

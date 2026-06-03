@@ -104,6 +104,19 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(BudgetAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponseDTO> handleBudgetAlreadyExists(BudgetAlreadyExistsException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new ErrorResponseDTO(HttpStatus.CONFLICT.value(), List.of(ex.getMessage())));
+    }
+
+    @ExceptionHandler(BudgetNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleBudgetNotFound(BudgetNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponseDTO(HttpStatus.NOT_FOUND.value(), List.of(ex.getMessage())));
+    }
 
 }
 

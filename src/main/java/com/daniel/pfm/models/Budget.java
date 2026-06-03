@@ -1,6 +1,7 @@
 package com.daniel.pfm.models;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,37 +10,43 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
-@Table(name = "budget")
+@Table(
+    name = "budget",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"category_id", "year_month"})
+)
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Budget {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @OneToOne(mappedBy = "budget")
-    private User user;
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
 
-    @OneToMany(mappedBy = "budget", cascade = CascadeType.ALL)
-    private List<Category> categories;
+    @Column(name = "year_month", nullable = false, length = 7)
+    private String yearMonth;
 
-    @Column(nullable = false, precision = 2, length = 15)
+    @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
 
-    @Column(unique = true)
-    private LocalDateTime yearMonth;
-
     @CreationTimestamp
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    public Budget(Category category, String yearMonth, BigDecimal amount) {
+        this.category = category;
+        this.yearMonth = yearMonth;
+        this.amount = amount;
+    }
 }

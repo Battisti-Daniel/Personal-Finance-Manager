@@ -26,6 +26,7 @@ public class UserService {
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
     private final AuthenticationManager authenticationManager;
+    private final DefaultCategorySeeder defaultCategorySeeder;
 
     @Transactional
     public AuthResponseDTO register(UserRequestDTO entity){
@@ -37,6 +38,7 @@ public class UserService {
         User user = createUser(entity);
 
         repository.save(user);
+        defaultCategorySeeder.seedFor(user);
 
         String accessToken = jwtService.generateToken(user.getEmail());
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user, entity.getDeviceId());

@@ -198,7 +198,6 @@ public class TransactionServiceTest {
 
         service.delete(transaction.getId(), user.getEmail());
 
-        // soft delete: salva com deletedAt preenchido, não chama delete físico
         verify(repository, times(1)).save(transaction);
         verify(repository, never()).delete(any());
         assertNotNull(transaction.getDeletedAt());

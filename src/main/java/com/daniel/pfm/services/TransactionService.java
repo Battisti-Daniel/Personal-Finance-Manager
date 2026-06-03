@@ -34,6 +34,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -43,44 +44,37 @@ public class TransactionService {
     private final TransactionalRepository repository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final KeywordCategorizationService keywordCategorizationService;
 
     @Transactional
-    public TransactionResponseDTO create(TransactionRequestDTO entity, String name){
+    public TransactionResponseDTO create(TransactionRequestDTO entity, String name) {
 
         User user = userRepository.findByEmail(name)
-                .orElseThrow(
-                        () -> new UsernameNotFoundException("Usuario não encontrado")
-                );
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+
         Category category = categoryRepository.findByIdAndUser(entity.getCategoryId(), user)
                 .orElseThrow(CategoryDoesNotExistsException::new);
 
-        Transaction response = new Transaction(entity,user, category);
-
-        response = repository.saveAndFlush(response);
+        Transaction response = repository.saveAndFlush(new Transaction(entity, user, category));
 
         return new TransactionResponseDTO(response);
-
     }
 
     public TransactionResponseDTO detail(UUID id, String name) {
 
         User user = userRepository.findByEmail(name)
-                .orElseThrow(
-                        () -> new UsernameNotFoundException("Usuario não encontrado")
-                );
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+
         Transaction transaction = repository.findByIdAndUserAndDeletedAtIsNull(id, user)
                 .orElseThrow(TransactionalNotFoundException::new);
 
         return new TransactionResponseDTO(transaction);
-
     }
 
     public Page<TransactionResponseDTO> findAll(String email, String month, UUID categoryId, TransactionType type, Pageable pageable) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new UsernameNotFoundException("Usuario não encontrado")
-                );
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
 
         Specification<Transaction> spec = Specification
                 .where(TransactionSpecification.byUser(user))
@@ -90,123 +84,128 @@ public class TransactionService {
                 .and(TransactionSpecification.notDeleted());
 
         return repository.findAll(spec, pageable).map(TransactionResponseDTO::new);
-
     }
+
     @Transactional
     public TransactionResponseDTO update(UUID id, TransactionPutDTO transactionRequestDTO, String name) {
 
         User user = userRepository.findByEmail(name)
-                .orElseThrow(
-                        () -> new UsernameNotFoundException("Usuario não encontrado")
-                );
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
 
-        Transaction transaction = repository.findByIdAndUserAndDeletedAtIsNull(id, user).orElseThrow(
-                TransactionalNotFoundException::new
-        );
+        Transaction transaction = repository.findByIdAndUserAndDeletedAtIsNull(id, user)
+                .orElseThrow(TransactionalNotFoundException::new);
 
         transaction = changeValues(transactionRequestDTO, transaction);
-
         repository.save(transaction);
 
         return new TransactionResponseDTO(transaction);
-
     }
 
     @Transactional
     public void delete(UUID id, String name) {
 
-        User user = userRepository.findByEmail(name).orElseThrow(
-                () -> new UsernameNotFoundException("Usuario não encontrado")
-        );
+        User user = userRepository.findByEmail(name)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
 
-        Transaction transaction = repository.findByIdAndUserAndDeletedAtIsNull(id, user).orElseThrow(
-                TransactionalNotFoundException::new
-        );
+        Transaction transaction = repository.findByIdAndUserAndDeletedAtIsNull(id, user)
+                .orElseThrow(TransactionalNotFoundException::new);
 
         transaction.setDeletedAt(LocalDateTime.now());
         repository.save(transaction);
-
     }
 
     @Transactional
     public CSVImportResponseDTO importCsv(MultipartFile file, String name) {
 
-        User user = userRepository.findByEmail(name).orElseThrow(
-                () -> new UsernameNotFoundException("Usuario não encontrado")
-        );
+        User user = userRepository.findByEmail(name)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
 
         List<CsvImportErrorDTO> errors = new ArrayList<>();
         List<Transaction> transactions = new ArrayList<>();
+        int autoCategorizedCount = 0;
 
-        try(CSVReader reader = new CSVReader(new InputStreamReader(file.getInputStream()))){
+        try (CSVReader reader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
 
+            reader.readNext(); // pula cabeçalho
             String[] line;
-
             int lineNumber = 1;
-            reader.readNext();
 
-            while((line = reader.readNext()) != null){
-                lineNumber += 1;
-                try{
-                    if(line.length < 4){
-                        errors.add(new CsvImportErrorDTO(lineNumber, "Linha com colunas insuficientes"));
+            while ((line = reader.readNext()) != null) {
+                lineNumber++;
+                try {
+                    if (line.length < 3) {
+                        errors.add(new CsvImportErrorDTO(lineNumber, "Linha com colunas insuficientes (mínimo: date, description, amount)"));
                         continue;
                     }
 
-                    String dateStr = line[0].trim();
-                    String description = line[1].trim();
-                    String amountStr = line[2].trim();
-                    String categoryIdStr = line[3].trim();
-                    String notes = line.length > 4 ? line[4].trim() : null;
+                    String dateStr       = line[0].trim();
+                    String description   = line[1].trim();
+                    String amountStr     = line[2].trim();
+                    String categoryIdStr = line.length > 3 ? line[3].trim() : "";
+                    String notes         = line.length > 4 ? line[4].trim() : null;
 
                     LocalDate date;
-
-                    try{
+                    try {
                         date = LocalDate.parse(dateStr);
-                    }catch (DateTimeParseException ex){
+                    } catch (DateTimeParseException ex) {
                         errors.add(new CsvImportErrorDTO(lineNumber, "Data inválida: " + dateStr));
                         continue;
                     }
 
-                    if (description.isBlank()){
+                    if (description.isBlank()) {
                         errors.add(new CsvImportErrorDTO(lineNumber, "Descrição não pode ser vazia"));
                         continue;
                     }
 
                     BigDecimal amount;
-
-                    try{
+                    try {
                         amount = new BigDecimal(amountStr);
-                        if(amount.compareTo(BigDecimal.ZERO) <= 0){
+                        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
                             errors.add(new CsvImportErrorDTO(lineNumber, "Valor deve ser maior que zero: " + amountStr));
                             continue;
                         }
-                    }catch (NumberFormatException ex){
+                    } catch (NumberFormatException ex) {
                         errors.add(new CsvImportErrorDTO(lineNumber, "Valor inválido: " + amountStr));
                         continue;
                     }
 
-                    UUID categoryId;
-                    try {
-                        categoryId = UUID.fromString(categoryIdStr);
-                    } catch (IllegalArgumentException e) {
-                        errors.add(new CsvImportErrorDTO(lineNumber, "CategoryId inválido: " + categoryIdStr));
-                        continue;
+                    // Resolução de categoria: por ID explícito ou por palavras-chave
+                    Category category = null;
+                    boolean autocat = false;
+
+                    if (!categoryIdStr.isBlank()) {
+                        UUID categoryId;
+                        try {
+                            categoryId = UUID.fromString(categoryIdStr);
+                        } catch (IllegalArgumentException e) {
+                            errors.add(new CsvImportErrorDTO(lineNumber, "CategoryId inválido: " + categoryIdStr));
+                            continue;
+                        }
+                        category = categoryRepository.findByIdAndUser(categoryId, user).orElse(null);
+                        if (category == null) {
+                            errors.add(new CsvImportErrorDTO(lineNumber, "Categoria não encontrada: " + categoryIdStr));
+                            continue;
+                        }
+                    } else {
+                        Optional<Category> autoCategory = keywordCategorizationService.categorize(description, user);
+                        if (autoCategory.isPresent()) {
+                            category = autoCategory.get();
+                            autocat = true;
+                        } else {
+                            errors.add(new CsvImportErrorDTO(lineNumber, "Categoria não informada e nenhuma palavra-chave reconhecida para: \"" + description + "\""));
+                            continue;
+                        }
                     }
 
-                    Category category = categoryRepository.findByIdAndUser(categoryId, user)
-                            .orElse(null);
-                    if (category == null) {
-                        errors.add(new CsvImportErrorDTO(lineNumber, "Categoria não encontrada: " + categoryIdStr));
-                        continue;
-                    }
+                    if (autocat) autoCategorizedCount++;
 
                     transactions.add(new Transaction(
-                            new TransactionRequestDTO(categoryId, description, amount, date, notes),
+                            new TransactionRequestDTO(category.getId(), description, amount, date, notes),
                             user,
                             category
                     ));
-                }catch (Exception e){
+
+                } catch (Exception e) {
                     errors.add(new CsvImportErrorDTO(lineNumber, "Erro inesperado: " + e.getMessage()));
                 }
             }
@@ -215,18 +214,16 @@ public class TransactionService {
                 throw new RuntimeException("Arquivo CSV vazio ou sem transações válidas");
             }
 
-            if(!errors.isEmpty()){
-                return new CSVImportResponseDTO(0, errors.size(), errors);
+            if (!errors.isEmpty()) {
+                return new CSVImportResponseDTO(0, 0, errors.size(), errors);
             }
 
             repository.saveAll(transactions);
+            return new CSVImportResponseDTO(transactions.size(), autoCategorizedCount, 0, List.of());
 
-            return new CSVImportResponseDTO(transactions.size(), 0, List.of());
-
-        }catch (CsvValidationException | IOException e){
+        } catch (CsvValidationException | IOException e) {
             throw new RuntimeException("Erro ao processar o arquivo CSV: " + e.getMessage());
         }
-
     }
 
     private Transaction changeValues(TransactionPutDTO newEntity, Transaction entity) {

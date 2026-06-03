@@ -39,10 +39,6 @@ public class Category {
     @Column(length = 7, nullable = false)
     private String color;
 
-    @ManyToOne
-    @JoinColumn(name = "budget_id")
-    private Budget budget;
-
     @Column(length = 50)
     private String icon;
 
@@ -60,5 +56,13 @@ public class Category {
         this.type = entity.getType();
         this.color = entity.getColor();
         this.icon = entity.getIcon();
+    }
+
+    public Category(User user, String name, TransactionType type, String color, String icon) {
+        this.user = user;
+        this.name = name;
+        this.type = type;
+        this.color = color;
+        this.icon = icon;
     }
 }
