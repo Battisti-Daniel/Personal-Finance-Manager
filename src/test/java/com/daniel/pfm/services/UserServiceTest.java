@@ -47,6 +47,9 @@ public class UserServiceTest {
     @Mock
     private RefreshTokenService refreshTokenService;
 
+    @Mock
+    private DefaultCategorySeeder defaultCategorySeeder;
+
     @InjectMocks
     private UserService userService;
 

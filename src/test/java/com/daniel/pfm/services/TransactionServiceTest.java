@@ -84,6 +84,7 @@ public class TransactionServiceTest {
         );
 
         transaction = new Transaction(transactionRequestDTO, user, category);
+        transaction.setId(UUID.randomUUID());
     }
 
     @Test
