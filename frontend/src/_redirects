@@ -1,6 +1,2 @@
-# Proxy: chamadas /api/* vão para o backend no Render
-# Substitua SEU_BACKEND_URL pela URL real do seu Web Service no Render
-/api/*  https://SEU_BACKEND_URL.onrender.com/api/:splat  200
-
-# SPA: qualquer rota desconhecida cai no index.html
+/api/*  https://personal-finance-manager-9p6v.onrender.com/api/:splat  200
 /*  /index.html  200
