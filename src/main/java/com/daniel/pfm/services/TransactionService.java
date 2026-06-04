@@ -114,6 +114,7 @@ public class TransactionService {
         repository.save(transaction);
     }
 
+
     @Transactional
     public CSVImportResponseDTO importCsv(MultipartFile file, String name) {
 
@@ -183,7 +184,7 @@ public class TransactionService {
                         }
                         category = categoryRepository.findByIdAndUser(categoryId, user).orElse(null);
                         if (category == null) {
-                            errors.add(new CsvImportErrorDTO(lineNumber, "Categoria não encontrada: " + categoryIdStr));
+                            errors.add(new CsvImportErrorDTO(lineNumber, "Categoria não está vinculada à sua conta. Por favor, verifique o ID: " + categoryIdStr));
                             continue;
                         }
                     } else {

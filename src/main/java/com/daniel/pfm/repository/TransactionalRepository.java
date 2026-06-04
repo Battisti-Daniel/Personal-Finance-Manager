@@ -18,7 +18,6 @@ public interface TransactionalRepository extends JpaRepository<Transaction, UUID
 
     Optional<Transaction> findByIdAndUserAndDeletedAtIsNull(UUID id, User user);
 
-
     @Query("""
             SELECT SUM(t.amount) FROM Transaction t
                 WHERE t.user = :user AND

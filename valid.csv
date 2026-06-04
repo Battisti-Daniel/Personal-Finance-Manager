@@ -1,3 +1,24 @@
 date,description,amount,categoryId,notes
-2026-01-15,Mercado Pão de Açúcar,245.80,19dbe328-1fcc-46b8-8990-8ffc23404a8e,Compras da semana
-2026-01-20,Conta de luz,180.00,19dbe328-1fcc-46b8-8990-8ffc23404a8e,Janeiro
+2026-06-01,Salário mensal,5500.00,556dee90-87ea-4959-bb37-8ce58d30092c,Salário junho
+2026-06-02,Freelance - Projeto web,1200.00,2c1e2b3f-b02e-4620-9a51-8381bd486f05,Projeto concluído
+2026-06-03,Mercado Carrefour,287.50,0e077743-c537-46b0-a019-2918d9420d2f,Compras da semana
+2026-06-05,Aluguel junho,1500.00,a5c01e09-8ef6-44c3-8b11-6b75d6502f4b,Moradia
+2026-06-07,Cinema Ingresso,45.00,14d9bc81-de2c-4090-b6c2-a8efe6dfcd43,Filme Homem-Aranha
+2026-06-08,Investimento Fundo,500.00,9cc139cc-0895-425a-977c-c8a4fd2b38b9,Aplicação mensal
+2026-06-10,Padaria Pão Francês,32.40,0e077743-c537-46b0-a019-2918d9420d2f,Pães frescos
+2026-06-12,Consulta Dentista,350.00,127f550e-b282-4011-b67e-f44c46b5779e,Limpeza e revisão
+2026-06-14,Supermercado Pão de Açúcar,215.90,0e077743-c537-46b0-a019-2918d9420d2f,Compras gerais
+2026-06-15,Lazer - Passeio,120.00,14d9bc81-de2c-4090-b6c2-a8efe6dfcd43,Diversão e entretenimento
+2026-06-16,Freelance - Design gráfico,800.00,2c1e2b3f-b02e-4620-9a51-8381bd486f05,Logo e branding
+2026-06-18,Educação - Curso online,199.90,f795e976-99dd-4a31-9a59-a15cd276d1de,Python avançado
+2026-06-20,Mercado Zona Leste,178.30,0e077743-c537-46b0-a019-2918d9420d2f,Feira da semana
+2026-06-21,Lazer - Diversão,85.00,14d9bc81-de2c-4090-b6c2-a8efe6dfcd43,Entretenimento familiar
+2026-06-22,Energia elétrica,215.00,a5c01e09-8ef6-44c3-8b11-6b75d6502f4b,Conta junho
+2026-06-23,Restaurante Comida Chinesa,95.50,ce5c580a-5bc0-4e24-ba6f-9c7dd76de823,Jantar com amigos
+2026-06-24,Prescrição e óculos,580.00,127f550e-b282-4011-b67e-f44c46b5779e,Oftalmologista
+2026-06-25,Reforma Casa,1250.00,ce5c580a-5bc0-4e24-ba6f-9c7dd76de823,Material e manutenção
+2026-06-26,Padaria Café,28.50,1cf65fdd-2fb5-410b-b037-c993aa8c35f5,Café e pastéis
+2026-06-27,Clube - Mensalidade,150.00,14d9bc81-de2c-4090-b6c2-a8efe6dfcd43,Junho
+2026-06-28,Supermercado Premium,342.80,0e077743-c537-46b0-a019-2918d9420d2f,Carnes e orgânicos
+2026-06-29,Investimento - Renda Fixa,1000.00,9cc139cc-0895-425a-977c-c8a4fd2b38b9,Tesouro direto
+2026-06-30,Outros - Doação,100.00,ce5c580a-5bc0-4e24-ba6f-9c7dd76de823,Caridade

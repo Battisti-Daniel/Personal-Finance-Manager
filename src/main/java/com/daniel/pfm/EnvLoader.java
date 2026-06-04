@@ -3,20 +3,24 @@ package com.daniel.pfm;
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class EnvLoader {
-    public static void load(){
 
-        Dotenv dotenv = Dotenv.load();
+    private static final String[] KEYS = {
+        "DB_USERNAME", "DB_PASSWORD", "DB_HOST", "DB_PORT",
+        "DB_DATABASE", "DB_NAME",
+        "JWT_SECRET", "JWT_EXPIRATION", "JWT_REFRESH_EXPIRATION",
+        "SPRING_PROFILES_ACTIVE"
+    };
 
-        System.setProperty("DB_USERNAME", dotenv.get("DB_USERNAME"));
-        System.setProperty("DB_PASSWORD", dotenv.get("DB_PASSWORD"));
-        System.setProperty("DB_HOST", dotenv.get("DB_HOST"));
-        System.setProperty("DB_PORT", dotenv.get("DB_PORT"));
-        System.setProperty("DB_DATABASE", dotenv.get("DB_DATABASE"));
-        System.setProperty("DB_NAME", dotenv.get("DB_NAME"));
+    public static void load() {
+        // ignoreIfMissing: em produção (Render, Docker) não há .env — as vars já estão no ambiente
+        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
 
-        System.setProperty("JWT_SECRET", dotenv.get("JWT_SECRET"));
-        System.setProperty("JWT_EXPIRATION", dotenv.get("JWT_EXPIRATION"));
-        System.setProperty("JWT_REFRESH_EXPIRATION", dotenv.get("JWT_REFRESH_EXPIRATION"));
-
+        for (String key : KEYS) {
+            // prioridade: .env > variável de ambiente já presente no processo
+            String value = dotenv.get(key, System.getenv(key));
+            if (value != null) {
+                System.setProperty(key, value);
+            }
+        }
     }
 }
