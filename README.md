@@ -1,65 +1,66 @@
-# Personal-Finance-Manager
-Sistema completo de gestão de finanças pessoais, com autenticação, categorização, orçamentos, relatórios e importação de extratos
+# Personal Finance Manager
 
-Sistema de gestão de finanças pessoais desenvolvido com Java e Spring Boot.
+Sistema completo de gestão de finanças pessoais, com autenticação, categorização, orçamentos, relatórios e importação de extratos.
 
-O objetivo do sistema é permitir que usuários gerenciem receitas, despesas, categorias financeiras e orçamentos mensais de forma segura e organizada.
+## Acesso
 
-O PFM é uma API REST multiusuário onde cada usuário possui acesso apenas aos próprios dados financeiros.
+| Ambiente | URL |
+|---|---|
+| Frontend | https://personal-finance-manager-front.onrender.com |
+| API | https://personal-finance-manager-9p6v.onrender.com |
+| Swagger UI | https://personal-finance-manager-9p6v.onrender.com/swagger-ui/index.html |
 
-# A aplicação permite
+## Funcionalidades
 
-Registro de receitas e despesas
+- Registro de receitas e despesas
+- Categorização de transações (manual ou automática via CSV)
+- Controle de orçamento mensal por categoria
+- Dashboard com gráficos de distribuição de despesas
+- Relatórios financeiros por período
+- Importação de transações via CSV
+- Autenticação com JWT (access token + refresh token)
+- Controle de acesso por usuário — cada usuário acessa apenas os próprios dados
 
-Categorização de transações
+## Tecnologias
 
-Controle de orçamento mensal por categoria
+**Backend**
+- Java 21 + Spring Boot 3
+- Spring Security + JWT (jjwt)
+- Spring Data JPA + Hibernate
+- PostgreSQL + Flyway
+- Springdoc OpenAPI (Swagger)
 
-Consulta de saldo e relatórios financeiros
+**Frontend**
+- Angular 17 (standalone components)
+- Angular Material
+- ng2-charts (Chart.js)
 
-Importação de transações via CSV
+**Infraestrutura**
+- Docker + Docker Compose
+- Deploy no Render (backend como Web Service, frontend como Static Site)
 
-Autenticação com JWT
+## Rodando localmente
 
-Controle de acesso por usuário
+**Pré-requisitos:** Docker e Docker Compose instalados.
 
-Persistência em PostgreSQL
+```bash
+git clone <repositorio>
+cd PFM
+cp .env.example .env
+# edite o .env com suas credenciais
+docker compose up --build -d
+```
 
-Migrations versionadas com Flyway
+Acesse em `http://localhost:4200`.
 
-# Tecnologias utilizadas
-  ## Backend
-Java 21
+## Variáveis de ambiente
 
-Spring Boot 3
-
-Spring Web
-
-Spring Data JPA
-
-Hibernate
-
-Spring Security
-
-JWT (jjwt)
-
-## Banco de dados
-
-PostgreSQL
-
-Flyway
+Veja o arquivo `.env.example` para a lista completa de variáveis necessárias.
 
 ## Testes
 
-JUnit 5
+```bash
+./mvnw test
+```
 
-Mockito
-
-AssertJ
-
-Testcontainers
-
-MockMvc
-
-## Frontend
-WIP
+Utiliza JUnit 5, Mockito, AssertJ, Testcontainers e MockMvc.
