@@ -11,9 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,12 +23,7 @@ public class UserController {
 
         AuthResponseDTO response = userService.register(entity);
 
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri()
-                .path("/{id}")
-                .buildAndExpand(response.getUser().getId())
-                .toUri();
-
-        return ResponseEntity.created(uri).body(response);
+        return ResponseEntity.ok().body(response);
 
     }
 
