@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { TransactionService } from '../../core/services/transaction.service';
+import { RefreshService } from '../../core/services/refresh.service';
 
 @Component({
   selector: 'app-csv-import',
@@ -104,6 +105,7 @@ export class CsvImportComponent {
 
    constructor(
      private svc: TransactionService,
+     private refresh: RefreshService,
      public dialogRef: MatDialogRef<CsvImportComponent>
    ) {}
 
@@ -129,8 +131,11 @@ export class CsvImportComponent {
           this.result = res;
           this.loading = false;
           if (res.imported > 0) {
-            // sucesso com importações: fecha automaticamente após 1.5s
+            this.refresh.refreshAll();
             setTimeout(() => this.dialogRef.close(true), 1500);
+          } else {
+            // nenhuma importada (só erros): libera o botão para nova tentativa
+            this.uploaded = false;
           }
         },
         error: err => {

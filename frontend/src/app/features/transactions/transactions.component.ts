@@ -134,6 +134,10 @@ import { Subscription } from 'rxjs';
        .filters-row { gap: 8px; }
        .filter-field { min-width: 120px; }
        .month-input { height: 40px; font-size: 12px; }
+
+       /* esconde categoria e tipo na tabela */
+       .mat-column-category,
+       .mat-column-type { display: none; }
      }
 
      @media (max-width: 480px) {
@@ -141,6 +145,13 @@ import { Subscription } from 'rxjs';
        .filters-row { flex-direction: column; gap: 8px; }
        .filter-field { width: 100%; min-width: 100%; }
        .month-input { width: 100%; }
+
+       /* no celular pequeno, data mais compacta */
+       .mat-column-date { font-size: 12px; }
+       .mat-column-description { font-size: 13px; }
+       .mat-column-amount { font-size: 13px; }
+       .mat-column-actions { width: 72px; }
+       .mat-column-actions button { transform: scale(0.85); }
      }
    `]
 })
