@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Page, Transaction } from '../models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class TransactionService {
-  private base = '/api/v1/transactions';
+  private base = `${environment.apiUrl}/v1/transactions`;
 
   constructor(private http: HttpClient) {}
 

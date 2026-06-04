@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Budget } from '../models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class BudgetService {
-  private base = '/api/v1/budgets';
+  private base = `${environment.apiUrl}/v1/budgets`;
 
   constructor(private http: HttpClient) {}
 
